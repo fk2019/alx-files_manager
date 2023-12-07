@@ -5,7 +5,6 @@ const router = express.Router();
 const appController = require('../controllers/AppController');
 
 router.get('/status', appController.getStatus);
-router.get('/stats', appController.getStats);
+//router.get('/stats', appController.getStats);
 
-module.expors = router;
-
+module.exports = router;
