@@ -13,5 +13,5 @@ router.get('/stats', appController.getStats);
 router.post('/users', express.json(), usersController.postNew);
 router.get('/connect', authController.getConnect);
 router.get('/disconnect', authController.getDisconnect);
-router.post('/users/me', usersController.getMe);
+router.get('/users/me', usersController.getMe);
 module.exports = router;
