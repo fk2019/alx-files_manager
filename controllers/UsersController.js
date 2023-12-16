@@ -15,8 +15,6 @@ class UsersController {
     if (user) return response.status(400).json({ error: 'Already exist' });
     const newUser = await dbClient.addUser(email, sha1(password));
     return response.status(200).json({ id: newUser._id, email: newUser.email });
-<<<<<<< HEAD
-=======
   }
 
   static async getMe(request, response) {
@@ -28,19 +26,6 @@ class UsersController {
       return response.status(200).json({ id: user._id, email: user.email });
     }
     return response.status(401).json({ error: 'Unauthorized' });
->>>>>>> 2e11de8a4b194797b77ae70017dab82b10621bcb
   }
-
-    static async getMe(request, response) {
-	const token = request.headers['x-token'];
-	const userId = await redisClient.get(`auth_${token}`);
-	console.log(token, userId);
-	if (userId) {
-	    const user = await dbClient.findUser({ _id: ObjectId(userId) });
-	    console.log(user._id, user.email);
-	    return response.status(200).json({ id : user._id, email: user.email });
-	} 
-	return response.status(401).json({ error: 'Unauthorized' });
-    }
 }
 module.exports = UsersController;
