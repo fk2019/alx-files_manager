@@ -22,7 +22,6 @@ class UsersController {
     const userId = await redisClient.get(`auth_${token}`);
     if (userId) {
       const user = await dbClient.findUser({ _id: ObjectId(userId) });
-      console.log(user._id, user.email);
       return response.status(200).json({ id: user._id, email: user.email });
     }
     return response.status(401).json({ error: 'Unauthorized' });
