@@ -6,7 +6,6 @@ import dbClient from '../utils/db';
 
 import redisClient from '../utils/redis';
 
-
 class AuthController {
   static async getConnect(request, response) {
     const b64Header = request.headers.authorization.split(' ')[1];
