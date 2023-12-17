@@ -30,7 +30,7 @@ class AuthController {
       redisClient.del(`auth_${token}`);
       return response.status(204).send('');
     }
-    return response.status(401).json({ error: 'Unautorized' });
+    return response.status(401).json({ error: 'Unauthorized' });
   }
 }
 module.exports = AuthController;
