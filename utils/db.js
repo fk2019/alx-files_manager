@@ -28,19 +28,19 @@ class DBClient {
   async findUser(u) {
     return this.database.collection('users').findOne(u);
   }
-    
-    async addUser(email, password) {
-	await this.database.collection('users').insertOne({ email, password });
-	return this.database.collection('users').findOne({ email });
-    }
-	
-    async findFile(f) {
-	return this.database.collection('files').findOne(f);
-    }
-    
-    async addFile(file) {
-	return  await this.database.collection('files').insertOne(file);
-    }
+
+  async addUser(email, password) {
+    await this.database.collection('users').insertOne({ email, password });
+    return this.database.collection('users').findOne({ email });
+  }
+
+  async findFile(f) {
+    return this.database.collection('files').findOne(f);
+  }
+
+  async addFile(file) {
+    return this.database.collection('files').insertOne(file);
+  }
 }
 
 const dbClient = new DBClient();
