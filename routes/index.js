@@ -8,10 +8,13 @@ const usersController = require('../controllers/UsersController');
 
 const authController = require('../controllers/AuthController');
 
+const filesController = require('../controllers/FilesController');
+
 router.get('/status', appController.getStatus);
 router.get('/stats', appController.getStats);
 router.post('/users', express.json(), usersController.postNew);
 router.get('/connect', authController.getConnect);
 router.get('/disconnect', authController.getDisconnect);
 router.get('/users/me', usersController.getMe);
+router.post('/files', express.json(), filesController.postUpload);
 module.exports = router;
