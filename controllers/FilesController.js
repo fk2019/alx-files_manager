@@ -79,9 +79,6 @@ class FilesController {
 	  const userId = await redisClient.get(`auth_${token}`);
 	  if (userId) {
 	    const file = await dbClient.findFile({ _id: ObjectId(id) });
-      console.log(file);
-      console.log(file._id, id);
-      console.log(typeof file._id)
 	    if (file._id.toString() === id) {
 		    const resData = {
 		      id: file._id.toString(),
