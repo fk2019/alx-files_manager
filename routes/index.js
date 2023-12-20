@@ -21,4 +21,5 @@ router.get('/files/:id', filesController.getShow);
 router.get('/files', filesController.getIndex);
 router.put('/files/:id/publish', filesController.putPublish);
 router.put('/files/:id/unpublish', filesController.putUnpublish);
+router.get('/files/:id/data', filesController.getFile);
 module.exports = router;

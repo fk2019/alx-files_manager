@@ -8,12 +8,14 @@ import redisClient from '../utils/redis';
 
 const { ObjectId } = require('mongodb');
 
-const { mkdir, writeFile } = require('fs');
+const { mkdir, writeFile, stat } = require('fs');
 
 const { join } = require('path');
+const mime = require('mime-types');
 
 const mkdirAsync = promisify(mkdir);
 const writeFileAsync = promisify(writeFile);
+const statAsync = promisify(stat);
 const folderPath = process.env.FOLDER_PATH;
 const storageFolder = folderPath && folderPath.length > 0 ? folderPath : '/tmp/files_manager';
 
@@ -78,6 +80,9 @@ class FilesController {
 	  const token = request.headers['x-token'];
 	  const userId = await redisClient.get(`auth_${token}`);
 	  if (userId) {
+      if (!ObjectId.isValid(id)) {
+        return response.status(404).json({ error: 'Not found' });
+      }
 	    const file = await dbClient.findFile({ _id: ObjectId(id) });
 	    if (file._id.toString() === id) {
 		    const resData = {
@@ -101,6 +106,9 @@ class FilesController {
 	  const token = request.headers['x-token'];
 	  const userId = await redisClient.get(`auth_${token}`);
 	  if (userId) {
+      if (!ObjectId.isValid(parentId)) {
+        return response.status(404).json({ error: 'Not found' });
+      }
 	    let matchCriteria;
 	    if (parentId !== 0) {
 		    matchCriteria = {
@@ -140,6 +148,9 @@ class FilesController {
 	  const token = request.headers['x-token'];
 	  const userId = await redisClient.get(`auth_${token}`);
     if (userId) {
+      if (!ObjectId.isValid(id)) {
+        return response.status(404).json({ error: 'Not found' });
+            }
       const file = await dbClient.findFile({ _id: ObjectId(id) });
 	    if (file._id.toString() === id) {
         const pipeline = [
@@ -169,7 +180,10 @@ class FilesController {
 	  const { id } = request.params;
 	  const token = request.headers['x-token'];
 	  const userId = await redisClient.get(`auth_${token}`);
-    if (userId) {
+    if (userId && ObjectId.isValid(id)) {
+      if (!ObjectId.isValid(id)) {
+        return response.status(404).json({ error: 'Not found' });
+      }
       const file = await dbClient.findFile({ _id: ObjectId(id) });
 	    if (file._id.toString() === id) {
         const pipeline = [
@@ -193,6 +207,36 @@ class FilesController {
       return response.status(404).json({ error: 'Not found' });
     }
     return response.status(401).json({ error: 'Unauthorized' });
+  }
+
+  static async getFile(request, response) {
+	  const { id } = request.params;
+	  const token = request.headers['x-token'];
+	  const userId = await redisClient.get(`auth_${token}`);
+    if (userId) {
+      if (!ObjectId.isValid(id)) {
+        return response.status(404).json({ error: 'Not found' });
+      }
+      const file = await dbClient.findFile({ _id: ObjectId(id) });
+      if (!file) {
+        return response.status(404).json({ error: 'Not found' });
+      }
+      if (file.type === 'folder') {
+        return response.status(400).json({ error: 'A folder doesn\'t have content' });
+      }
+      try {
+        await statAsync(file.localPath);
+        if (file.userId.toString() === userId && file.isPublic === true) {
+          const ctype = mime.contentType(file.name);
+          response.setHeader('Content-Type', ctype);
+          return response.status(200).sendFile(file.localPath);
+        }
+        return response.status(404).json({ error: 'Not found' });
+      } catch (err) {
+        return response.status(404).json({ error: 'Not found' });
+      }
+    }
+    return response.status(404).json({ error: 'Not found' });
   }
 }
 module.exports = FilesController;
