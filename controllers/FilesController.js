@@ -95,7 +95,7 @@ class FilesController {
 	  return response.status(401).json({ error: 'Unauthorized' });
   }
 
-  static async getIndex(request, response) {
+  static getIndex = async(request, response) => {
 	  const parentId = request.query.parentId ? request.query.parentId : 0;
 	  const page = request.query.page ? request.query.page : 0;
 	  const token = request.headers['x-token'];
@@ -135,5 +135,64 @@ class FilesController {
 	  return response.status(401).json({ error: 'Unauthorized' });
   }
 
+  static async putPublish(request, response) {
+	  const { id } = request.params;
+	  const token = request.headers['x-token'];
+	  const userId = await redisClient.get(`auth_${token}`);
+    if (userId) {
+      const file = await dbClient.findFile({ _id: ObjectId(id) });
+	    if (file._id.toString() === id) {
+        const pipeline = [
+          { $set : {
+            isPublic: true,
+          },
+          }
+        ];
+        const result = await dbClient.updateFile({ _id: file._id }, pipeline);
+        const file2 = await dbClient.findFile({ _id: ObjectId(id) });
+        const resData = {
+		      id: file2._id.toString(),
+		      userId,
+		      name: file2.name,
+		      type: file2.type,
+		      isPublic: file2.isPublic,
+		      parentId: file2.parentId,
+		    };
+        return response.status(200).json(resData);
+      }
+      return response.status(404).json({ error: 'Not found' });
+    }
+    return response.status(401).json({ error: 'Unauthorized' });
+  }
+
+  static async putUnpublish(request, response) {
+	  const { id } = request.params;
+	  const token = request.headers['x-token'];
+	  const userId = await redisClient.get(`auth_${token}`);
+    if (userId) {
+      const file = await dbClient.findFile({ _id: ObjectId(id) });
+	    if (file._id.toString() === id) {
+        const pipeline = [
+          { $set : {
+            isPublic: false,
+          },
+          }
+        ];
+        const result = await dbClient.updateFile({ _id: file._id }, pipeline);
+        const file2 = await dbClient.findFile({ _id: ObjectId(id) });
+        const resData = {
+		      id: file2._id.toString(),
+		      userId,
+		      name: file2.name,
+		      type: file2.type,
+		      isPublic: file2.isPublic,
+		      parentId: file2.parentId,
+		    };
+        return response.status(200).json(resData);
+      }
+      return response.status(404).json({ error: 'Not found' });
+    }
+    return response.status(401).json({ error: 'Unauthorized' });
+  }
 }
 module.exports = FilesController;

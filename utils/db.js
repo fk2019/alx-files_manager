@@ -45,6 +45,10 @@ class DBClient {
   async getAggregate(a) {
 	  return this.database.collection('files').aggregate(a).toArray();
   }
+
+  async updateFile(file, pipeline) {
+    return this.database.collection('files').updateOne(file, pipeline);
+  }
 }
 
 const dbClient = new DBClient();
