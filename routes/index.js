@@ -17,4 +17,6 @@ router.get('/connect', authController.getConnect);
 router.get('/disconnect', authController.getDisconnect);
 router.get('/users/me', usersController.getMe);
 router.post('/files', express.json({ limit: '50mb' }), filesController.postUpload);
+router.get('/files/:id', filesController.getShow);
+router.get('/files', filesController.getIndex);
 module.exports = router;

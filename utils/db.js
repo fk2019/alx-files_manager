@@ -41,6 +41,9 @@ class DBClient {
   async addFile(file) {
     return this.database.collection('files').insertOne(file);
   }
+    async getAggregate(a) {
+	return this.database.collection('files').aggregate(a).toArray();
+    }
 }
 
 const dbClient = new DBClient();

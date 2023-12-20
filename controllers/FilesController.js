@@ -72,5 +72,70 @@ class FilesController {
     }
     return response.status(401).json({ error: 'Unauthorized' });
   }
+
+    static async getShow(request, response) {
+	const { id } = request.params;
+	const token = request.headers['x-token'];
+	const userId = await redisClient.get(`auth_${token}`);
+	if (userId) {
+	    const file = await dbClient.findFile({ userId: ObjectId(userId) });
+	    if (file._id.toString() === id) {
+		const resData = {
+		    id: file._id.toString(),
+		    userId,
+		    name: file.name,
+		    type: file.type,
+		    isPublic: file.isPublic,
+		    parentId: file.parentId,
+		};
+		return response.status(200).json(resData);
+	    }
+	    return response.status(404).json({ error: 'Not found' });
+	}
+	return response.status(401).json({ error: 'Unauthorized' });
+    }
+    static async getIndex(request, response) {
+	const parentId = request.query.parentId ? request.query.parentId : 0;
+	const page = request.query.page ? request.query.page : 0;
+	const token = request.headers['x-token'];
+	const userId = await redisClient.get(`auth_${token}`);
+	if (userId) {
+	    let matchCriteria;
+	    if (parentId !== 0) {
+		matchCriteria = {
+		    parentId: parentId ? ObjectId(parentId): 0,
+		}
+	    } else {
+		matchCriteria = {
+		    userId: ObjectId(userId),
+		}
+	    }
+	    const skip = page * 20;
+	    const pipeline = [
+		{ $match: matchCriteria },
+		{ $skip: skip },
+		{ $limit: 20 },
+//		{ $addFields: { id: '$_id' }},
+		{ $project:
+		  {
+		      id: '$_id',
+		      userId: 1,
+		      name: 1,
+		      type: 1,
+		      isPublic: 1,
+		      parentId: 1,
+		      localPath: 0,
+		      _id: 0,
+		  },
+		},
+
+	    ];
+	    const r = await dbClient.getAggregate(pipeline);
+	    console.log(r);
+	    return response.send('yes');
+	}
+	return response.status(401).json({ error: 'Unauthorized' });
+    }
+
 }
 module.exports = FilesController;
